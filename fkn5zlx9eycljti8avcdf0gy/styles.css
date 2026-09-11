@@ -322,13 +322,23 @@ body.opened .hero__scroll { animation: rise 1s ease 3s both; }
 .chev { width: 11px; height: 11px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; rotate: 45deg; animation: bob 1.8s ease-in-out infinite; }
 @keyframes bob { 50% { transform: translate(4px, 4px); } }
 
-.balloons { position: absolute; inset: 0; pointer-events: none; }
+/* Fade the section edges so balloons never look cut off at the seam between screens. */
+.balloons {
+  position: absolute; inset: 0; pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 84%, transparent 100%);
+}
 .balloon {
   position: absolute; left: var(--x); top: 100%; width: var(--size); pointer-events: auto; cursor: pointer;
   animation: balloon-up var(--dur) linear var(--delay) infinite; will-change: transform;
 }
 .balloon__svg { display: block; width: 100%; height: auto; overflow: visible; transform-origin: 50% 0; animation: sway var(--sway) ease-in-out infinite alternate; }
-@keyframes balloon-up { to { transform: translateY(calc(-100svh - 130%)); } }
+@keyframes balloon-up {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(calc(-100svh - 130%)); opacity: 0; }
+}
 @keyframes sway { from { transform: rotate(-5deg) translateX(-6px); } to { transform: rotate(5deg) translateX(6px); } }
 .balloon.is-popped { animation-play-state: paused; pointer-events: none; }
 .balloon.is-popped .balloon__svg { animation: pop .3s ease-out forwards; }

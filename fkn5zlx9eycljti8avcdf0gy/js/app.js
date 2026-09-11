@@ -30,10 +30,11 @@ async function loadCard(key) {
   return unpackPayload(await decrypt(key, new Uint8Array(await res.arrayBuffer())));
 }
 
+// Only the fonts of the very first screen are worth waiting for.
 function fontsReady(card) {
-  const sample = `${card.name}${card.initial}${card.hero.greeting}`;
-  const faces = ['400 1em "Great Vibes"', 'italic 500 1em "Cormorant Garamond"', '400 1em "Nunito"', '500 1em "Caveat"'];
-  return Promise.race([Promise.all(faces.map((f) => document.fonts.load(f, sample))), wait(3000)]).catch(() => {});
+  const sample = `${card.name}${card.initial}${card.envelope.to}`;
+  const faces = ['400 1em "Great Vibes"', '500 1em "Caveat"'];
+  return Promise.race([Promise.all(faces.map((f) => document.fonts.load(f, sample))), wait(1500)]).catch(() => {});
 }
 
 function night() {
@@ -42,11 +43,11 @@ function night() {
   })));
 }
 
-function start(card, media) {
+function start(card, mediaType, key) {
   document.title = card.pageTitle;
   const back = createStage('fx--back');
   const front = createStage('fx--front');
-  const music = createMusic(media, card.music?.label);
+  const music = createMusic(mediaType, key, card.music?.label);
   // Confetti flies in front of the content; fireworks burst in the sky behind it.
   const ctx = { front, back, dusk: () => document.body.classList.add('dusk') };
 
@@ -86,14 +87,15 @@ async function boot() {
   const key = parseKey(location.hash);
   if (!key) return notFound();
   document.documentElement.classList.add('on');
-  let payload;
+  let card;
+  let mediaType;
   try {
-    payload = await loadCard(key);
+    ({ card, mediaType } = (await loadCard(key)).data);
   } catch {
     return notFound();
   }
-  await fontsReady(payload.data);
-  start(payload.data, payload.media);
+  await fontsReady(card);
+  start(card, mediaType, key);
 }
 
 boot();
