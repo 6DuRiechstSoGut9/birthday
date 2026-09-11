@@ -47,11 +47,7 @@ export function cake(card, { back, dusk, gate }) {
   const step = n > 1 ? Math.min(10, 40 / (n - 1)) : 0;
   let lit = n;
   const done = h('p', { class: 'cake__done', text: card.cake.done });
-  const tap = card.cake.tap
-    ? h('p', { class: 'cake__tap' },
-      h('span', { class: 'cake__tap-icon', 'aria-hidden': 'true', text: '👆' }),
-      h('span', { text: card.cake.tap }))
-    : null;
+  const tap = card.cake.tap ? h('p', { class: 'cake__tap', text: card.cake.tap }) : null;
 
   function celebrate() {
     gate.open(); // the finale exists only after the wish
