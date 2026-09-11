@@ -42,13 +42,19 @@ function cakeSvg() {
     pearls(70, 147, 160));
 }
 
-export function cake(card, { back, dusk }) {
+export function cake(card, { back, dusk, gate }) {
   const n = card.cake.candles;
   const step = n > 1 ? Math.min(10, 40 / (n - 1)) : 0;
   let lit = n;
   const done = h('p', { class: 'cake__done', text: card.cake.done });
+  const tap = card.cake.tap
+    ? h('p', { class: 'cake__tap' },
+      h('span', { class: 'cake__tap-icon', 'aria-hidden': 'true', text: '👆' }),
+      h('span', { text: card.cake.tap }))
+    : null;
 
   function celebrate() {
+    gate.open(); // the finale exists only after the wish
     dusk();
     done.classList.add('is-in');
     setTimeout(() => back.add(fireworks({ rockets: 9 })), 1200);
@@ -69,7 +75,9 @@ export function cake(card, { back, dusk }) {
       if (candle.classList.contains('is-out')) return;
       candle.classList.add('is-out');
       candle.setAttribute('aria-disabled', 'true');
-      if (--lit === 0) setTimeout(celebrate, 900);
+      if (--lit > 0) return;
+      tap?.classList.add('is-done');
+      setTimeout(celebrate, 900);
     });
     return candle;
   });
@@ -78,7 +86,9 @@ export function cake(card, { back, dusk }) {
     h('div', { class: 'cake__inner' },
       h('h2', { class: 'h2', 'data-reveal': true, text: card.cake.title }),
       h('p', { class: 'hint', 'data-reveal': true, vars: { i: 1 }, text: card.cake.hint }),
+      tap,
       h('div', { class: 'cake__wrap', 'data-reveal': true, vars: { i: 2 } }, cakeSvg(), h('div', { class: 'candles' }, candles)),
       done));
+
   return { el };
 }

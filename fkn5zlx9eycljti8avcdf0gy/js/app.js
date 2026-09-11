@@ -39,7 +39,8 @@ function fontsReady(card) {
 
 function night() {
   return h('div', { class: 'night', 'aria-hidden': 'true' }, Array.from({ length: 70 }, () => h('i', {
-    vars: { x: `${rand(0, 100)}%`, y: `${rand(0, 80)}%`, s: `${rand(1, 2.8).toFixed(1)}px`, t: `${rand(1.4, 3.8).toFixed(1)}s`, d: `${rand(-4, 0).toFixed(1)}s` },
+    // Positive delays so the stars light up one by one as the evening falls.
+    vars: { x: `${rand(0, 100)}%`, y: `${rand(0, 80)}%`, s: `${rand(1, 2.8).toFixed(1)}px`, t: `${rand(1.4, 3.8).toFixed(1)}s`, d: `${rand(0.4, 3).toFixed(1)}s` },
   })));
 }
 
@@ -49,7 +50,13 @@ function start(card, mediaType, key) {
   const front = createStage('fx--front');
   const music = createMusic(mediaType, key, card.music?.label);
   // Confetti flies in front of the content; fireworks burst in the sky behind it.
-  const ctx = { front, back, dusk: () => document.body.classList.add('dusk') };
+  const ctx = {
+    front,
+    back,
+    dusk: () => document.body.classList.add('dusk'),
+    // The cake cannot be skipped: the page simply ends there until the candles are out.
+    gate: { open: () => document.body.classList.remove('gate-cake') },
+  };
 
   const heroScene = hero(card, ctx);
   const story = h('main', { class: 'story' },
@@ -60,7 +67,7 @@ function start(card, mediaType, key) {
     h('div', { class: 'blobs', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('i')),
     night(), back.canvas, grain(), story, front.canvas, env.el, music?.button,
   ].filter(Boolean));
-  document.body.classList.add('locked');
+  document.body.classList.add('locked', 'gate-cake');
   back.add(petals(reducedMotion ? 6 : window.innerWidth < 700 ? 16 : 28));
 
   env.revealed.then(() => {
