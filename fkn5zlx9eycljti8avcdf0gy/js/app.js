@@ -71,7 +71,18 @@ function start(card, media) {
   });
 }
 
+// Hosts without custom headers (GitHub Pages) cannot send `frame-ancestors`/X-Frame-Options,
+// so refuse to decrypt anything when the page is embedded in a frame.
+function framed() {
+  try {
+    return window.top !== window.self;
+  } catch {
+    return true;
+  }
+}
+
 async function boot() {
+  if (framed()) return notFound();
   const key = parseKey(location.hash);
   if (!key) return notFound();
   document.documentElement.classList.add('on');
